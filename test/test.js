@@ -174,3 +174,28 @@ describe('load helpers:', function () {
     });
   });
 });
+
+describe('options', function () {
+  describe('options.cwd', function () {
+    it('should pass cwd option to globby:', function () {
+      var cache = {};
+      var helpers = loader(cache);
+      helpers('*.js', {
+        cwd: 'test/fixtures'
+      });
+      assert(typeof cache.alpha === 'function');
+      assert(typeof cache.beta === 'function');
+      assert(typeof cache.gamma === 'function');
+    });
+
+    it('should pass nonull option to globby:', function () {
+      var cache = {};
+      var helpers = loader(cache);
+      helpers('*.foo', {
+        nonull: true,
+        cwd: 'test/fixtures',
+      });
+      assert.deepEqual(cache, {});
+    });
+  });
+});

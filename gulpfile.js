@@ -5,13 +5,13 @@ var jshint = require('gulp-jshint');
 var mocha = require('gulp-mocha');
 
 gulp.task('jshint', function() {
-  return gulp.src(['index.js', 'lib/*.js'])
+  return gulp.src(['index.js', 'utils.js'])
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));
 });
 
 gulp.task('test', ['jshint'], function (cb) {
-  gulp.src(['index.js', 'lib/*.js'])
+  gulp.src(['index.js', 'utils.js'])
     .pipe(istanbul())
     .pipe(istanbul.hookRequire())
     .on('finish', function () {
