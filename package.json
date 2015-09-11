@@ -1,7 +1,7 @@
 {
   "name": "load-helpers",
   "description": "The most interesting project in the world > Verb",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "homepage": "https://github.com/jonschlinkert/load-helpers",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/load-helpers",
@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "globby": "^3.0.1",
-    "has-glob": "^0.1.0",
     "is-valid-glob": "^0.3.0"
   },
   "devDependencies": {
