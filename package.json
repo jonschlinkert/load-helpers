@@ -1,7 +1,7 @@
 {
   "name": "load-helpers",
   "description": "The most interesting project in the world > Verb",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/jonschlinkert/load-helpers",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/load-helpers",
@@ -34,5 +34,26 @@
     "mocha": "*",
     "should": "*"
   },
-  "keywords": []
+  "keywords": [
+    "engine",
+    "engines",
+    "filter",
+    "function",
+    "handlebars",
+    "helper",
+    "helpers",
+    "imports",
+    "load",
+    "loader",
+    "template"
+  ],
+  "verb": {
+    "related": {
+      "list": [
+        "helper-cache",
+        "template-helpers",
+        "handlebars-helpers"
+      ]
+    }
+  }
 }
