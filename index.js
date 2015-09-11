@@ -62,6 +62,8 @@ module.exports = function (cache) {
       if (typeof file === 'function') {
         name = utils.renameKey(name, opts);
         loadHelpers(name, file);
+      } else {
+        loadHelpers(file, opts);
       }
     }
     return cache;
