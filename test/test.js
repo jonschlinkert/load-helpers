@@ -6,6 +6,15 @@ var loader = require('..');
 
 describe('load helpers:', function () {
   describe('object:', function () {
+    it('should throw an error when key is a function:', function () {
+      var cache = {};
+      var helpers = loader(cache);
+
+      (function () {
+        helpers('./test/fixtures/fail/fn.js');
+      }).should.throw('key should be an object, array or string.');
+    });
+
     it('should require helpers from a file path:', function () {
       var cache = {};
       var helpers = loader(cache);

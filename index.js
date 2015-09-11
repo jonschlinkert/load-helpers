@@ -13,6 +13,10 @@ module.exports = function (cache) {
   cache = cache || {};
 
   function loadHelpers(key, val) {
+    if (typeof key === 'function') {
+      throw new TypeError('key should be an object, array or string.');
+    }
+
     if (typeof val === 'function') {
       return addHelper(key, val);
     }
@@ -35,7 +39,7 @@ module.exports = function (cache) {
   }
 
   function addHelpers(helpers, opts) {
-    if (Array.isArray(helpers)) {
+    if (Array.isArray(helpers) && helpers.length) {
       helpers.forEach(function (helper) {
         loadHelpers(helper, opts);
       });
