@@ -17,7 +17,7 @@ module.exports = function (cache) {
       throw new TypeError('key should be an object, array or string.');
     }
 
-    if (typeof val === 'function') {
+    if (typeof val === 'function' || typeof val === 'string') {
       return addHelper(key, val);
     }
     if (utils.isObject(key)) {
@@ -34,7 +34,9 @@ module.exports = function (cache) {
   }
 
   function addHelper(name, fn) {
-    cache[name] = fn;
+    cache[name] = typeof fn === 'string'
+      ? utils.tryRequire(fn)
+      : fn;
     return cache;
   }
 

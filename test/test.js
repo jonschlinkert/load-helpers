@@ -149,6 +149,13 @@ describe('load helpers:', function () {
       assert(typeof foo.upper === 'function');
       assert(typeof bar.lower === 'function');
     });
+
+    it('should load a key-value pair where the value is a string:', function () {
+      var cache = {};
+      var helper = loader(cache);
+      helper('foo', './test/fixtures/a.js');
+      assert(typeof cache.foo === 'function');
+    });
   });
 
   describe('module', function () {

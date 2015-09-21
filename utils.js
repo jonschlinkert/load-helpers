@@ -17,15 +17,15 @@ lazy('is-valid-glob', 'isGlob');
 var utils = lazy;
 
 utils.tryRequire = function tryRequire(name, opts) {
+  // try to require by `name`
   try {
-    // try to require by `name`
     return require(name);
-  } catch(err) {
-    try {
-      var fp = utils.resolve(name, opts);
-      return require(fp);
-    } catch(err) {}
-  }
+  } catch(err) {}
+
+  // try to require by absolute path
+  try {
+    return require(utils.resolve(name, opts));
+  } catch(err) {}
   return null;
 };
 
