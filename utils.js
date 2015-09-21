@@ -8,6 +8,7 @@ var path = require('path');
 
 var lazy = require('lazy-cache')(require);
 lazy('globby', 'glob');
+lazy('resolve-dir');
 lazy('is-valid-glob', 'isGlob');
 
 /**
@@ -17,6 +18,8 @@ lazy('is-valid-glob', 'isGlob');
 var utils = lazy;
 
 utils.tryRequire = function tryRequire(name, opts) {
+  name = lazy.resolveDir(name);
+
   // try to require by `name`
   try {
     return require(name);
