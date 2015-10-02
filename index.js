@@ -9,7 +9,8 @@
 
 var utils = require('./utils');
 
-module.exports = function (cache) {
+module.exports = function (cache, options) {
+  options = options || {};
   cache = cache || {};
 
   function loadHelpers(key, val) {
@@ -34,9 +35,14 @@ module.exports = function (cache) {
   }
 
   function addHelper(name, fn) {
-    cache[name] = typeof fn === 'string'
+    var fn = typeof fn === 'string'
       ? utils.tryRequire(fn)
       : fn;
+
+    if (options.async === true) {
+      fn.async = true;
+    }
+    cache[name] = fn;
     return cache;
   }
 

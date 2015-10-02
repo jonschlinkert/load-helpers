@@ -31,6 +31,14 @@ describe('load helpers:', function () {
       assert(typeof obj.a === 'function');
     });
 
+    it('should add an async flag to async helpers:', function () {
+      var cache = {};
+      var helpers = loader(cache, {async: true});
+
+      var obj = helpers('./test/fixtures/a.js');
+      assert.equal(obj.a.async, true);
+    });
+
     it('should load helpers defined as an object:', function () {
       var cache = {};
       var helpers = loader(cache);
