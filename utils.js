@@ -6,19 +6,21 @@ var path = require('path');
  * Lazily required module dependencies
  */
 
-var lazy = require('lazy-cache')(require);
-lazy('globby', 'glob');
-lazy('resolve-dir');
-lazy('is-valid-glob', 'isGlob');
+var utils = require('lazy-cache')(require);
+
+var fn = require;
+require = utils;
+require('matched', 'glob');
+require('resolve-dir');
+require('is-valid-glob', 'isGlob');
+require = fn;
 
 /**
  * Utils
  */
 
-var utils = lazy;
-
 utils.tryRequire = function tryRequire(name, opts) {
-  name = lazy.resolveDir(name);
+  name = utils.resolveDir(name);
 
   // try to require by `name`
   try {
