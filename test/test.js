@@ -80,6 +80,14 @@ describe('load helpers:', function () {
       assert(typeof cache.a === 'function');
     });
 
+    it('should load helper objects defined as file paths 2:', function () {
+      var cache = {};
+      var helpers = loader(cache);
+      helpers({a: './test/fixtures/a.js'});
+
+      assert(typeof cache.a === 'function');
+    });
+
     it('should load helper objects defined as an array of file paths:', function () {
       var cache = {};
       var helpers = loader(cache);
@@ -171,7 +179,7 @@ describe('load helpers:', function () {
       var cache = {};
       var helper = loader(cache);
 
-      helper('has-glob', {
+      helper('is-valid-glob', {
         renameKey: function (key) {
           return key.replace(/-(.)/g, function (m, ch) {
             return ch.toUpperCase();
@@ -179,7 +187,7 @@ describe('load helpers:', function () {
         }
       });
 
-      assert(typeof cache.hasGlob === 'function');
+      assert(typeof cache.isValidGlob === 'function');
     });
   });
 
