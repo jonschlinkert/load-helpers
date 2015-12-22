@@ -1,7 +1,7 @@
 {
   "name": "load-helpers",
   "description": "Load helpers with patterns, as an object, key-value pair, or module.",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "homepage": "https://github.com/jonschlinkert/load-helpers",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/load-helpers",
