@@ -43,7 +43,7 @@ utils.renameKey = function renameKey(name, opts) {
 };
 
 utils.resolve = function resolve(fp, opts) {
-  var cwd = opts.cwd || process.cwd();
+  var cwd = (opts && opts.cwd) || process.cwd();
   return path.resolve(cwd, fp);
 };
 
