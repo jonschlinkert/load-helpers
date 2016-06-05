@@ -9,8 +9,8 @@ helpers('upper', function upper(str) {
 });
 
 helpers('is-valid-glob', {
-  renameKey: function (key) {
-    return key.replace(/\W(.)/g, function (m, ch) {
+  renameKey: function(key) {
+    return key.replace(/\W(.)/g, function(m, ch) {
       return ch.toUpperCase();
     });
   }
@@ -33,8 +33,8 @@ helpers([
   qux: function() {},
   fez: function() {}
 }], {
-  renameKey: function (key) {
-    return key.replace(/-(.)/g, function (m, ch) {
+  renameKey: function(key) {
+    return key.replace(/-(.)/g, function(m, ch) {
       return ch.toUpperCase();
     });
   }

@@ -1,21 +1,23 @@
+'use strict';
+
 require('mocha');
 require('should');
 var path = require('path');
 var assert = require('assert');
 var loader = require('..');
 
-describe('load helpers:', function () {
-  describe('object:', function () {
-    it('should throw an error when key is a function:', function () {
+describe('load helpers:', function() {
+  describe('object:', function() {
+    it('should throw an error when key is a function:', function() {
       var cache = {};
       var helpers = loader(cache);
 
-      (function () {
+      (function() {
         helpers('./test/fixtures/fail/fn.js');
       }).should.throw('key should be an object, array or string.');
     });
 
-    it('should require helpers from a file path:', function () {
+    it('should require helpers from a file path:', function() {
       var cache = {};
       var helpers = loader(cache);
 
@@ -23,7 +25,7 @@ describe('load helpers:', function () {
       assert(typeof cache.a === 'function');
     });
 
-    it('should return helpers:', function () {
+    it('should return helpers:', function() {
       var cache = {};
       var helpers = loader(cache);
 
@@ -31,7 +33,7 @@ describe('load helpers:', function () {
       assert(typeof obj.a === 'function');
     });
 
-    it('should add an async flag to async helpers:', function () {
+    it('should add an async flag to async helpers:', function() {
       var cache = {};
       var helpers = loader(cache, {async: true});
 
@@ -39,31 +41,31 @@ describe('load helpers:', function () {
       assert.equal(obj.a.async, true);
     });
 
-    it('should load helpers defined as an object:', function () {
+    it('should load helpers defined as an object:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers({
-      	a: function (str) {
+      	a: function(str) {
 	      	return str;
 	      }
       });
       assert(typeof cache.a === 'function');
     });
 
-    it('should load multiple helpers defined as objects.', function () {
+    it('should load multiple helpers defined as objects.', function() {
       var cache = {};
       var helper = loader(cache);
       helper({
-        a: function (str) {
+        a: function(str) {
         	return str;
         },
-        b: function (str) {
+        b: function(str) {
         	return str;
         },
-        c: function (str) {
+        c: function(str) {
         	return str;
         },
-        d: function (str) {
+        d: function(str) {
         	return str;
         }
       });
@@ -72,7 +74,7 @@ describe('load helpers:', function () {
       keys.should.have.length(4);
     });
 
-    it('should load helper objects defined as file paths:', function () {
+    it('should load helper objects defined as file paths:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers('test/fixtures/a.js');
@@ -80,7 +82,7 @@ describe('load helpers:', function () {
       assert(typeof cache.a === 'function');
     });
 
-    it('should load helper objects defined as file paths 2:', function () {
+    it('should load helper objects defined as file paths 2:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers({a: './test/fixtures/a.js'});
@@ -88,7 +90,7 @@ describe('load helpers:', function () {
       assert(typeof cache.a === 'function');
     });
 
-    it('should load helper objects defined as an array of file paths:', function () {
+    it('should load helper objects defined as an array of file paths:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers(['test/fixtures/a.js', 'test/fixtures/b.js', 'test/fixtures/c.js']);
@@ -98,7 +100,7 @@ describe('load helpers:', function () {
       assert(typeof cache.c === 'function');
     });
 
-    it('should load helper objects defined as an array of glob patterns:', function () {
+    it('should load helper objects defined as an array of glob patterns:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers(['test/fixtures/*.js']);
@@ -108,7 +110,7 @@ describe('load helpers:', function () {
       assert(typeof cache.c === 'function');
     });
 
-    it('should load helper objects defined as a string of glob patterns:', function () {
+    it('should load helper objects defined as a string of glob patterns:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers('test/fixtures/*.js');
@@ -120,21 +122,21 @@ describe('load helpers:', function () {
 
   });
 
-  describe('array', function () {
-    it('should load an array of helpers.', function () {
+  describe('array', function() {
+    it('should load an array of helpers.', function() {
       var cache = {};
       var helper = loader(cache);
       helper([{
-        a: function (str) {
+        a: function(str) {
           return str;
         },
-        b: function (str) {
+        b: function(str) {
           return str;
         },
-        c: function (str) {
+        c: function(str) {
           return str;
         },
-        d: function (str) {
+        d: function(str) {
           return str;
         }
       }]);
@@ -144,8 +146,8 @@ describe('load helpers:', function () {
     });
   });
 
-  describe('key-value pair', function () {
-    it('should load a helper as a key-value pair:', function () {
+  describe('key-value pair', function() {
+    it('should load a helper as a key-value pair:', function() {
       var cache = {};
       var helper = loader(cache);
       helper('upper', function upper(str) {
@@ -154,7 +156,7 @@ describe('load helpers:', function () {
       assert(typeof cache.upper === 'function');
     });
 
-    it('should return an object of helpers loaded as key-value pairs:', function () {
+    it('should return an object of helpers loaded as key-value pairs:', function() {
       var helper = loader();
       var foo = helper('upper', function upper(str) {
         return str.toUpperCase();
@@ -166,7 +168,7 @@ describe('load helpers:', function () {
       assert(typeof bar.lower === 'function');
     });
 
-    it('should load a key-value pair where the value is a string:', function () {
+    it('should load a key-value pair where the value is a string:', function() {
       var cache = {};
       var helper = loader(cache);
       helper('foo', './test/fixtures/a.js');
@@ -174,14 +176,14 @@ describe('load helpers:', function () {
     });
   });
 
-  describe('module', function () {
-    it('should load a helper function from node_modules:', function () {
+  describe('module', function() {
+    it('should load a helper function from node_modules:', function() {
       var cache = {};
       var helper = loader(cache);
 
       helper('is-valid-glob', {
-        renameKey: function (key) {
-          return key.replace(/-(.)/g, function (m, ch) {
+        renameKey: function(key) {
+          return key.replace(/-(.)/g, function(m, ch) {
             return ch.toUpperCase();
           });
         }
@@ -191,13 +193,13 @@ describe('load helpers:', function () {
     });
   });
 
-  describe('rename options', function () {
-    it('should use a custom renameKey function on file paths:', function () {
+  describe('rename options', function() {
+    it('should use a custom renameKey function on file paths:', function() {
       var cache = {};
       var helper = loader(cache);
 
       helper('test/fixtures/a.js', {
-        renameKey: function (key) {
+        renameKey: function(key) {
           return 'helper-' + path.basename(key);
         }
       });
@@ -207,9 +209,9 @@ describe('load helpers:', function () {
   });
 });
 
-describe('options', function () {
-  describe('options.cwd', function () {
-    it('should pass cwd option to globby:', function () {
+describe('options', function() {
+  describe('options.cwd', function() {
+    it('should pass cwd option to globby:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers('*.js', {
@@ -220,7 +222,7 @@ describe('options', function () {
       assert(typeof cache.gamma === 'function');
     });
 
-    it('should pass nonull option to globby:', function () {
+    it('should pass nonull option to globby:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers('*.foo', {

@@ -9,7 +9,7 @@
 
 var utils = require('./utils');
 
-module.exports = function (cache, options) {
+module.exports = function(cache, options) {
   options = options || {};
   cache = cache || {};
 
@@ -48,7 +48,7 @@ module.exports = function (cache, options) {
 
   function addHelpers(helpers, opts) {
     if (Array.isArray(helpers) && helpers.length) {
-      helpers.forEach(function (helper) {
+      helpers.forEach(function(helper) {
         loadHelpers(helper, opts);
       });
     } else {

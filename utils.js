@@ -25,12 +25,12 @@ utils.tryRequire = function tryRequire(name, opts) {
   // try to require by `name`
   try {
     return require(name);
-  } catch(err) {}
+  } catch (err) {}
 
   // try to require by absolute path
   try {
     return require(utils.resolve(name, opts));
-  } catch(err) {}
+  } catch (err) {}
   return null;
 };
 
