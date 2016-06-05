@@ -2,17 +2,18 @@
 
 var path = require('path');
 
+var utils = require('lazy-cache')(require);
+var fn = require;
+require = utils;
+
 /**
  * Lazily required module dependencies
  */
 
-var utils = require('lazy-cache')(require);
-
-var fn = require;
-require = utils;
+require('extend-shallow', 'extend');
+require('is-valid-glob', 'isGlob');
 require('matched', 'glob');
 require('resolve-dir');
-require('is-valid-glob', 'isGlob');
 require = fn;
 
 /**

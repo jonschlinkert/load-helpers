@@ -7,6 +7,7 @@
 
 'use strict';
 
+var util = require('util');
 var utils = require('./utils');
 
 module.exports = function(cache, options) {
@@ -21,9 +22,11 @@ module.exports = function(cache, options) {
     if (typeof val === 'function' || typeof val === 'string') {
       return addHelper(key, val);
     }
+
     if (utils.isObject(key)) {
       return addHelpers(key, val);
     }
+
     val = val || {};
     key = utils.arrayify(key);
     if (!utils.isGlob(key)) {
@@ -35,9 +38,13 @@ module.exports = function(cache, options) {
   }
 
   function addHelper(name, fn) {
-    var fn = typeof fn === 'string'
-      ? utils.tryRequire(fn)
-      : fn;
+    if (typeof fn === 'string') {
+      fn = utils.tryRequire(fn);
+    }
+
+    if (typeof fn !== 'function' && !utils.isObject(fn)) {
+      throw new TypeError('expected a function or object');
+    }
 
     if (options.async === true) {
       fn.async = true;
@@ -51,9 +58,23 @@ module.exports = function(cache, options) {
       helpers.forEach(function(helper) {
         loadHelpers(helper, opts);
       });
-    } else {
+    } else if (utils.isObject(helpers)) {
       for (var name in helpers) {
-        addHelper(name, helpers[name]);
+        var helper = helpers[name];
+        if (typeof helper === 'function') {
+          addHelper(name, helper);
+        } else if (utils.isObject(helper)) {
+          addHelpers(helper, opts);
+        } else if (typeof helper === 'string') {
+          addHelper(name, utils.tryRequire(helper));
+        } else if (Array.isArray(helper)) {
+          var obj = {};
+          obj[name] = {};
+          helper.forEach(function(val) {
+            utils.extend(obj[name], loadHelpers(val, opts));
+          });
+          utils.extend(cache, obj);
+        }
       }
     }
     return cache;
