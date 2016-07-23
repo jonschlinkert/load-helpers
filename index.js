@@ -10,7 +10,7 @@
 var Emitter = require('component-emitter');
 var utils = require('./utils');
 
-module.exports = Emitter(loadHelpers);
+module.exports = loadHelpers;
 
 function loadHelpers(cache, options) {
   options = options || {};
@@ -53,7 +53,7 @@ function loadHelpers(cache, options) {
     }
 
     cache[name] = fn;
-    loadHelpers.emit(options.emit || 'helper', name, fn, !!fn.async);
+    loaderFn.emit(options.emit || 'helper', name, fn, !!fn.async);
     return cache;
   }
 
@@ -106,5 +106,5 @@ function loadHelpers(cache, options) {
     return cache;
   }
 
-  return loaderFn;
+  return Emitter(loaderFn);
 };
