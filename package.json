@@ -23,19 +23,18 @@
     "test": "mocha"
   },
   "dependencies": {
+    "component-emitter": "^1.2.1",
     "extend-shallow": "^2.0.1",
     "is-valid-glob": "^0.3.0",
     "lazy-cache": "^2.0.1",
-    "matched": "^0.4.1",
+    "matched": "^0.4.3",
     "resolve-dir": "^0.1.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-eslint": "^2.0.0",
-    "gulp-istanbul": "^0.10.4",
-    "gulp-mocha": "^2.2.0",
-    "mocha": "^2.5.3",
-    "should": "^9.0.0"
+    "gulp-eslint": "^3.0.1",
+    "gulp-format-md": "^0.1.9",
+    "mocha": "^2.5.3"
   },
   "keywords": [
     "engine",
@@ -51,12 +50,28 @@
     "template"
   ],
   "verb": {
+    "toc": false,
+    "layout": "default",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
     "related": {
       "list": [
         "handlebars-helpers",
         "helper-cache",
-        "template-helpers"
+        "template-helpers",
+        "templates"
       ]
+    },
+    "reflinks": [
+      "verb",
+      "verb-generate-readme"
+    ],
+    "lint": {
+      "reflinks": true
     }
   }
 }

@@ -7,14 +7,16 @@
 
 'use strict';
 
-var util = require('util');
+var Emitter = require('component-emitter');
 var utils = require('./utils');
 
-module.exports = function(cache, options) {
+module.exports = Emitter(loadHelpers);
+
+function loadHelpers(cache, options) {
   options = options || {};
   cache = cache || {};
 
-  function loadHelpers(key, val) {
+  function loaderFn(key, val) {
     if (typeof key === 'function') {
       throw new TypeError('key should be an object, array or string.');
     }
@@ -49,14 +51,16 @@ module.exports = function(cache, options) {
     if (options.async === true) {
       fn.async = true;
     }
+
     cache[name] = fn;
+    loadHelpers.emit(options.emit || 'helper', name, fn, !!fn.async);
     return cache;
   }
 
   function addHelpers(helpers, opts) {
     if (Array.isArray(helpers) && helpers.length) {
       helpers.forEach(function(helper) {
-        loadHelpers(helper, opts);
+        loaderFn(helper, opts);
       });
     } else if (utils.isObject(helpers)) {
       for (var name in helpers) {
@@ -71,7 +75,7 @@ module.exports = function(cache, options) {
           var obj = {};
           obj[name] = {};
           helper.forEach(function(val) {
-            utils.extend(obj[name], loadHelpers(val, opts));
+            utils.extend(obj[name], loaderFn(val, opts));
           });
           utils.extend(cache, obj);
         }
@@ -94,13 +98,13 @@ module.exports = function(cache, options) {
       var file = utils.tryRequire(name, opts);
       if (typeof file === 'function') {
         name = utils.renameKey(name, opts);
-        loadHelpers(name, file);
+        loaderFn(name, file);
       } else {
-        loadHelpers(file, opts);
+        loaderFn(file, opts);
       }
     }
     return cache;
   }
 
-  return loadHelpers;
+  return loaderFn;
 };
