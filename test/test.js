@@ -48,9 +48,9 @@ describe('load helpers:', function() {
       var cache = {};
       var helpers = loader(cache);
       helpers({
-      	a: function(str) {
-	      	return str;
-	      }
+        a: function(str) {
+          return str;
+        }
       });
       assert.equal(typeof cache.a, 'function');
     });
@@ -60,16 +60,16 @@ describe('load helpers:', function() {
       var helper = loader(cache);
       helper({
         a: function(str) {
-        	return str;
+          return str;
         },
         b: function(str) {
-        	return str;
+          return str;
         },
         c: function(str) {
-        	return str;
+          return str;
         },
         d: function(str) {
-        	return str;
+          return str;
         }
       });
 

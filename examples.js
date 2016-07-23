@@ -2,6 +2,10 @@ var loader = require('./');
 var cache = {};
 var helpers = loader(cache);
 
+loader.on('helper', function(name, fn, isAsync) {
+  console.log(name, isAsync);
+});
+
 var opts = {cwd: 'test/fixtures'};
 
 helpers('upper', function upper(str) {
