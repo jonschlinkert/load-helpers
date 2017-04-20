@@ -1,110 +1,238 @@
-/*!
- * load-helpers <https://github.com/jonschlinkert/load-helpers>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
 'use strict';
 
+var path = require('path');
+var glob = require('matched');
+var set = require('set-value');
+var typeOf = require('kind-of');
+var extend = require('extend-shallow');
 var Emitter = require('component-emitter');
+var isValidGlob = require('is-valid-glob');
+var isGlob = require('is-glob');
 var utils = require('./utils');
 
-module.exports = loadHelpers;
+/**
+ * Create an instance of `Loader` with the given `options`.
+ *
+ * ```js
+ * var Loader = require('load-helpers');
+ * var loader = new Loader();
+ * ```
+ * @param {Object} `options`
+ * @api public
+ */
 
-function loadHelpers(cache, options) {
-  options = options || {};
-  cache = cache || {};
+function Loader(options) {
+  if (!(this instanceof Loader)) {
+    return new Loader(options);
+  }
+  this.options = options || {};
+  this.cache = this.options.cache || {};
+}
 
-  function loaderFn(key, val) {
-    if (typeof key === 'function') {
-      throw new TypeError('key should be an object, array or string.');
-    }
+/**
+ * Inherit `Emitter`
+ */
 
-    if (typeof val === 'function' || typeof val === 'string') {
-      return addHelper(key, val);
-    }
+Loader.prototype = Object.create(Emitter.prototype);
+Loader.prototype.constructor = Loader;
 
-    if (utils.isObject(key)) {
-      return addHelpers(key, val);
-    }
-
-    val = val || {};
-    key = utils.arrayify(key);
-    if (!utils.isGlob(key)) {
-      return addHelpers(key, val);
-    }
-
-    loader(key, val);
-    return cache;
+Loader.prototype.addHelper = function(name, fn, options) {
+  if (typeof name !== 'string') {
+    throw new TypeError('expected helper name to be a string');
+  }
+  if (typeof fn !== 'function') {
+    throw new TypeError('expected helper to be a function');
   }
 
-  function addHelper(name, fn) {
-    if (typeof fn === 'string') {
-      fn = utils.tryRequire(fn);
-    }
-
-    if (typeof fn !== 'function' && !utils.isObject(fn)) {
-      throw new TypeError('expected a function or object');
-    }
-
-    if (options.async === true) {
-      fn.async = true;
-    }
-
-    cache[name] = fn;
-    loaderFn.emit(options.emit || 'helper', name, fn, !!fn.async);
-    return cache;
+  if (typeof options === 'boolean') {
+    options = { async: options };
   }
 
-  function addHelpers(helpers, opts) {
-    if (Array.isArray(helpers) && helpers.length) {
-      helpers.forEach(function(helper) {
-        loaderFn(helper, opts);
-      });
-    } else if (utils.isObject(helpers)) {
-      for (var name in helpers) {
-        var helper = helpers[name];
-        if (typeof helper === 'function') {
-          addHelper(name, helper);
-        } else if (utils.isObject(helper)) {
-          addHelpers(helper, opts);
-        } else if (typeof helper === 'string') {
-          addHelper(name, utils.tryRequire(helper));
-        } else if (Array.isArray(helper)) {
-          var obj = {};
-          obj[name] = {};
-          helper.forEach(function(val) {
-            utils.extend(obj[name], loaderFn(val, opts));
-          });
-          utils.extend(cache, obj);
+  if (options && options.async === true) {
+    fn.async = true;
+  }
+
+  set(this.cache, name, fn);
+  this.emit('helper', name, fn);
+  return this;
+};
+
+Loader.prototype.addHelpers = function(helpers, options) {
+  var keys = Object.keys(helpers);
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    this.addHelper(key, helpers[key], options);
+  }
+  return this;
+};
+
+/**
+ * Load one or more helpers from a filepath, glob pattern, object, or
+ * array of filepaths, glob patterns or objects. This method detects
+ * the type of value to be handled then calls one of the other methods
+ * to do the actual loading.
+ *
+ * ```js
+ * var loader = new Loader();
+ * console.log(loader.load(['foo/*.hbs', 'bar/*.hbs']));
+ * console.log(loader.load({path: 'a/b/c.md'}));
+ * console.log(loader.load('index', {path: 'a/b/c.md'}));
+ * ```
+ * @param {Object} `helpers`
+ * @param {Object} `options`
+ * @return {Object} Returns the views from `loader.cache`
+ * @api public
+ */
+
+Loader.prototype.load = function(val, options) {
+  if (typeof options === 'boolean') {
+    options = { isAsync: options };
+  }
+
+  switch (typeOf(val)) {
+    case 'string':
+    case 'function':
+      return this.loadHelper.apply(this, arguments);
+    case 'object':
+      return this.loadHelpers.apply(this, arguments);
+    case 'array':
+      if (isValidGlob(val)) {
+        var cache = this.loadGlob.apply(this, arguments);
+        return this.loadHelpers(cache, options);
+      }
+      return this.loadHelpers.apply(this, arguments);
+    default: {
+      throw new TypeError('expected name to be an object, array or string');
+    }
+  }
+};
+
+Loader.prototype.loadHelper = function(name, fn, options) {
+  if (utils.isObject(fn)) {
+    options = fn;
+    fn = undefined;
+  }
+
+  if (isGlob(name)) {
+    var cache = this.loadGlob.apply(this, arguments);
+    return this.loadHelpers(cache, options);
+  }
+
+  var opts = utils.options(this, options);
+  if (typeof fn === 'string') {
+    fn = utils.tryRequire(fn, opts);
+  }
+
+  if (typeof fn !== 'function') {
+    var val = this.loadFile(name, options);
+    if (utils.isObject(val)) {
+      return this.addHelpers(val, options);
+    }
+
+    name = utils.renameHelper(name, options);
+    return this.addHelper(name, val, options);
+  }
+
+  this.addHelper(name, fn, options);
+  return this;
+};
+
+Loader.prototype.loadHelpers = function(helpers, options) {
+  if (Array.isArray(helpers) && helpers.length) {
+    for (var i = 0; i < helpers.length; i++) {
+      this.load(helpers[i], options);
+    }
+
+  } else if (utils.isObject(helpers)) {
+    var keys = Object.keys(helpers);
+    var len = keys.length;
+    var idx = -1;
+
+    while (++idx < len) {
+      var name = keys[idx];
+      var helper = helpers[name];
+      var type = typeOf(helper);
+
+      switch (type) {
+        case 'function':
+          this.loadHelper(name, helper, options);
+          break;
+        case 'object':
+          this.loadGroup(name, helper, options);
+          break;
+        case 'string':
+          this.loadHelper(name, utils.tryRequire(helper), options);
+          break;
+        case 'array':
+          if (isValidGlob(helper)) {
+            var cache = this.loadGlob(helper, options);
+            this.loadGroup(name, cache, options);
+          } else {
+            for (var j = 0; j < helper.length; j++) {
+              var val = helper[j];
+              if (isValidGlob(val)) {
+                val = this.loadGlob(val, options);
+              }
+              this.loadGroup(name, val, options);
+            }
+          }
+          break;
+        default: {
+          throw new TypeError('unsupported helper type: ' + type);
         }
       }
     }
-    return cache;
   }
-
-  function loader(patterns, opts) {
-    var files = utils.glob.sync(patterns, opts);
-    var len = files.length;
-
-    if (!len) {
-      files = patterns;
-      len = files.length;
-    }
-
-    while (len--) {
-      var name = files[len];
-      var file = utils.tryRequire(name, opts);
-      if (typeof file === 'function') {
-        name = utils.renameKey(name, opts);
-        loaderFn(name, file);
-      } else {
-        loaderFn(file, opts);
-      }
-    }
-    return cache;
-  }
-
-  return Emitter(loaderFn);
+  return this;
 };
+
+Loader.prototype.loadGroup = function(name, helpers, options) {
+  if (typeof helpers === 'function') {
+    this.addHelper(name, helpers);
+  }
+
+  var keys = Object.keys(helpers);
+  for (var j = 0; j < keys.length; j++) {
+    var key = keys[j];
+    this.addHelper(name + '.' + key, helpers[key], options);
+  }
+  return this;
+};
+
+Loader.prototype.loadFile = function(name, options) {
+  if (typeof name !== 'string') {
+    throw new TypeError('expected filepath or module name to be a string');
+  }
+  var opts = utils.options(this, options);
+  var val = utils.tryRequire(name, opts);
+
+  if (typeof val === 'function') {
+    var cache = {};
+    name = utils.renameHelper(name, opts);
+    cache[name] = val;
+    return cache;
+  }
+  return val;
+};
+
+Loader.prototype.loadGlob = function(patterns, options) {
+  var opts = utils.options(this, options);
+  var cache = {};
+
+  if (typeof patterns === 'string' && !isGlob(patterns)) {
+    return this.loadFile(patterns, options);
+  }
+
+  var files = glob.sync(patterns, opts);
+  for (var i = 0; i < files.length; i++) {
+    var name = path.resolve(opts.cwd, files[i]);
+    cache = extend({}, cache, this.loadFile(name, opts));
+  }
+  return cache;
+};
+
+/**
+ * Expose `Loader`
+ */
+
+module.exports = Loader;

@@ -4,6 +4,10 @@
   "version": "0.3.1",
   "homepage": "https://github.com/jonschlinkert/load-helpers",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "contributors": [
+    "Brian Woodward <brian.woodward@gmail.com> (https://twitter.com/doowb)",
+    "Jon Schlinkert <jon.schlinkert@sellside.com> (http://twitter.com/jonschlinkert)"
+  ],
   "repository": "jonschlinkert/load-helpers",
   "bugs": {
     "url": "https://github.com/jonschlinkert/load-helpers/issues"
@@ -11,8 +15,6 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "LICENSE",
-    "README.md",
     "utils.js"
   ],
   "main": "index.js",
@@ -25,14 +27,14 @@
   "dependencies": {
     "component-emitter": "^1.2.1",
     "extend-shallow": "^2.0.1",
+    "is-glob": "^3.1.0",
     "is-valid-glob": "^0.3.0",
-    "lazy-cache": "^2.0.1",
+    "kind-of": "^3.1.0",
     "matched": "^0.4.3",
-    "resolve-dir": "^0.1.0"
+    "resolve-dir": "^0.1.0",
+    "set-value": "^0.4.2"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^3.0.1",
     "gulp-format-md": "^0.1.9",
     "mocha": "^2.5.3"
   },

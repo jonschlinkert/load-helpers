@@ -3,245 +3,298 @@
 require('mocha');
 var path = require('path');
 var assert = require('assert');
-var loader = require('..');
+var Loader = require('..');
+var loader;
+
+function size(obj) {
+  return Object.keys(obj).length;
+}
 
 describe('load helpers:', function() {
-  describe('object:', function() {
-    it('should throw an error when key is a function:', function(cb) {
-      var cache = {};
-      var helpers = loader(cache);
-
-      try {
-        helpers('test/fixtures/fail/fn.js');
-        cb(new Error('expected an error'));
-      } catch (err) {
-        assert.equal(err.message, 'key should be an object, array or string.');
-        cb();
-      }
-    });
-
-    it('should require helpers from a file path:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-
-      helpers('test/fixtures/a.js');
-      assert.equal(typeof cache.a, 'function');
-    });
-
-    it('should return helpers:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-
-      var obj = helpers('test/fixtures/a.js');
-      assert.equal(typeof obj.a, 'function');
-    });
-
-    it('should add an async flag to async helpers:', function() {
-      var cache = {};
-      var helpers = loader(cache, {async: true});
-
-      var obj = helpers('test/fixtures/a.js');
-      assert.equal(obj.a.async, true);
-    });
-
-    it('should load helpers defined as an object:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers({
-        a: function(str) {
-          return str;
-        }
-      });
-      assert.equal(typeof cache.a, 'function');
-    });
-
-    it('should load multiple helpers defined as objects.', function() {
-      var cache = {};
-      var helper = loader(cache);
-      helper({
-        a: function(str) {
-          return str;
-        },
-        b: function(str) {
-          return str;
-        },
-        c: function(str) {
-          return str;
-        },
-        d: function(str) {
-          return str;
-        }
-      });
-
-      var keys = Object.keys(cache);
-      assert.equal(keys.length, 4);
-    });
-
-    it('should load helper objects defined as file paths:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers('test/fixtures/a.js');
-
-      assert.equal(typeof cache.a, 'function');
-    });
-
-    it('should load helper objects from an object property value defined as a string', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers({a: 'test/fixtures/a.js'});
-
-      assert.equal(typeof cache.a, 'function');
-    });
-
-    it('should load helper objects from an object property value defined as an array', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers({foo: ['test/fixtures/a.js', 'test/fixtures/b.js']});
-
-      assert.equal(typeof cache.foo.a, 'function');
-      assert.equal(typeof cache.foo.b, 'function');
-    });
-
-    it('should load helper objects defined as an array of file paths:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers(['test/fixtures/a.js', 'test/fixtures/b.js', 'test/fixtures/c.js']);
-
-      assert.equal(typeof cache.a, 'function');
-      assert.equal(typeof cache.b, 'function');
-      assert.equal(typeof cache.c, 'function');
-    });
-
-    it('should load helper objects defined as an array of glob patterns:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers(['test/fixtures/*.js']);
-
-      assert.equal(typeof cache.a, 'function');
-      assert.equal(typeof cache.b, 'function');
-      assert.equal(typeof cache.c, 'function');
-    });
-
-    it('should load helper objects defined as a string of glob patterns:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers('test/fixtures/*.js');
-
-      assert.equal(typeof cache.a, 'function');
-      assert.equal(typeof cache.b, 'function');
-      assert.equal(typeof cache.c, 'function');
-    });
-
+  beforeEach(function() {
+    loader = new Loader();
   });
 
-  describe('array', function() {
-    it('should load an array of helpers.', function() {
-      var cache = {};
-      var helper = loader(cache);
-      helper([{
-        a: function(str) {
-          return str;
-        },
-        b: function(str) {
-          return str;
-        },
-        c: function(str) {
-          return str;
-        },
-        d: function(str) {
-          return str;
-        }
-      }]);
+  describe('errors:', function() {
+    it('should throw an error when key is a function:', function() {
+      assert.throws(function() {
+        loader.load('test/fixtures/fail/fn.js');
+      });
 
-      var keys = Object.keys(cache);
-      assert.equal(keys.length, 4);
+      assert.throws(function() {
+        loader.load();
+      });
     });
   });
 
   describe('key-value pair', function() {
-    it('should load a helper as a key-value pair:', function() {
-      var cache = {};
-      var helper = loader(cache);
-      helper('upper', function upper(str) {
+    it('should support helpers defined as key-value pairs:', function() {
+      loader.loadHelper('upper', function(str) {
         return str.toUpperCase();
       });
-      assert.equal(typeof cache.upper, 'function');
-    });
-
-    it('should return an object of helpers loaded as key-value pairs:', function() {
-      var helper = loader();
-      var foo = helper('upper', function upper(str) {
-        return str.toUpperCase();
-      });
-      var bar = helper('lower', function lower(str) {
+      loader.loadHelper('lower', function(str) {
         return str.toLowerCase();
       });
-      assert.equal(typeof foo.upper, 'function');
-      assert.equal(typeof bar.lower, 'function');
+      assert.equal(typeof loader.cache.upper, 'function');
+      assert.equal(typeof loader.cache.lower, 'function');
     });
 
     it('should load a key-value pair where the value is a string:', function() {
-      var cache = {};
-      var helper = loader(cache);
-      helper('foo', 'test/fixtures/a.js');
-      assert.equal(typeof cache.foo, 'function');
+      loader.load('foo', 'test/fixtures/a.js');
+      assert.equal(typeof loader.cache.foo, 'function');
     });
   });
 
-  describe('module', function() {
-    it('should load a helper function from node_modules:', function() {
-      var cache = {};
-      var helper = loader(cache);
+  describe('filepath', function() {
+    it('should require helpers from file paths defined as a string:', function() {
+      loader.load('test/fixtures/a.js');
+      loader.load('test/fixtures/b.js');
+      loader.load('test/fixtures/c.js');
 
-      helper('is-valid-glob', {
-        renameKey: function(key) {
+      assert.equal(size(loader.cache), 3);
+      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(typeof loader.cache.b, 'function');
+      assert.equal(typeof loader.cache.c, 'function');
+    });
+  });
+
+  describe('object', function() {
+    it('should load helpers from an object:', function() {
+      loader.load({
+        a: function(str) {
+          return str;
+        },
+        b: function(str) {
+          return str;
+        },
+        c: function(str) {
+          return str;
+        },
+        d: function(str) {
+          return str;
+        }
+      });
+
+      loader.load({
+        z: function(str) {
+          return str;
+        }
+      });
+
+      assert.equal(size(loader.cache), 5);
+      assert.equal(typeof loader.cache.a, 'function');
+    });
+
+    it('should load an object of helpers with filepath values', function() {
+      loader.load({a: 'test/fixtures/a.js'});
+      assert.equal(typeof loader.cache.a, 'function');
+    });
+
+    it('should load an object of helpers with array values', function() {
+      loader.load({foo: ['test/fixtures/a.js', 'test/fixtures/b.js']});
+
+      assert.equal(typeof loader.cache.foo.a, 'function');
+      assert.equal(typeof loader.cache.foo.b, 'function');
+    });
+  });
+
+  describe('array', function() {
+    it('should load helpers from an array of file paths:', function() {
+      loader.load(['test/fixtures/a.js', 'test/fixtures/b.js', 'test/fixtures/c.js']);
+
+      assert.equal(size(loader.cache), 3);
+      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(typeof loader.cache.b, 'function');
+      assert.equal(typeof loader.cache.c, 'function');
+    });
+
+    it('should load helpers from an array of objects:', function() {
+      loader.load([
+        {
+          a: function(str) {
+            return str;
+          },
+          b: function(str) {
+            return str;
+          },
+          c: function(str) {
+            return str;
+          },
+          d: function(str) {
+            return str;
+          }
+        },
+        {
+          z: function(str) {
+            return str;
+          }
+        }
+      ]);
+
+      assert.equal(size(loader.cache), 5);
+      assert.equal(typeof loader.cache.a, 'function');
+    });
+
+    it('should load helper objects defined as an array of file paths:', function() {
+      loader.load(['test/fixtures/a.js', 'test/fixtures/b.js', 'test/fixtures/c.js']);
+      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(typeof loader.cache.b, 'function');
+      assert.equal(typeof loader.cache.c, 'function');
+    });
+  });
+
+  describe('glob', function() {
+    it('should load helper objects defined as an array of glob patterns:', function() {
+      loader.load(['test/fixtures/*.js']);
+      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(typeof loader.cache.b, 'function');
+      assert.equal(typeof loader.cache.c, 'function');
+    });
+
+    it('should load helper objects defined as a string of glob patterns:', function() {
+      loader.load('test/fixtures/*.js');
+
+      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(typeof loader.cache.b, 'function');
+      assert.equal(typeof loader.cache.c, 'function');
+    });
+  });
+
+  describe('groups', function() {
+    it('should add an object of helpers to a namespace', function() {
+      loader.load({
+        utils: {
+          a: function(str) {
+            return str;
+          },
+          b: function(str) {
+            return str;
+          },
+          c: function(str) {
+            return str;
+          },
+          d: function(str) {
+            return str;
+          }
+        }
+      });
+      assert.equal(size(loader.cache.utils), 4);
+      assert.equal(typeof loader.cache.utils.a, 'function');
+      assert.equal(typeof loader.cache.utils.b, 'function');
+      assert.equal(typeof loader.cache.utils.c, 'function');
+      assert.equal(typeof loader.cache.utils.d, 'function');
+    });
+
+    it('should add an array of helper objects to a namespace', function() {
+      loader.load({
+        utils: [{
+          a: function(str) {
+            return str;
+          },
+          b: function(str) {
+            return str;
+          },
+          c: function(str) {
+            return str;
+          },
+          d: function(str) {
+            return str;
+          }
+        }]
+      });
+      assert.equal(size(loader.cache.utils), 4);
+      assert.equal(typeof loader.cache.utils.a, 'function');
+      assert.equal(typeof loader.cache.utils.b, 'function');
+      assert.equal(typeof loader.cache.utils.c, 'function');
+      assert.equal(typeof loader.cache.utils.d, 'function');
+    });
+
+    it('should add an array of helper strings to a namespace', function() {
+      loader.load({
+        utils: [
+          'test/fixtures/a.js',
+          'test/fixtures/b.js',
+          'test/fixtures/c.js'
+        ]
+      });
+      assert.equal(size(loader.cache.utils), 3);
+      assert.equal(typeof loader.cache.utils.a, 'function');
+      assert.equal(typeof loader.cache.utils.b, 'function');
+      assert.equal(typeof loader.cache.utils.c, 'function');
+    });
+
+    it('should add an array of mixed helper args to a namespace', function() {
+      loader.load({
+        utils: [
+          'test/fixtures/a.js',
+          'test/fixtures/b.js',
+          {
+            c: function(str) {
+              return str;
+            },
+            d: function(str) {
+              return str;
+            }
+          }
+        ]
+      });
+      assert.equal(size(loader.cache.utils), 4);
+      assert.equal(typeof loader.cache.utils.a, 'function');
+      assert.equal(typeof loader.cache.utils.b, 'function');
+      assert.equal(typeof loader.cache.utils.c, 'function');
+      assert.equal(typeof loader.cache.utils.d, 'function');
+    });
+  });
+
+  describe('installed module', function() {
+    it('should load a helper function from local node_modules:', function() {
+      loader.load('is-valid-glob', {
+        renameHelper: function(key) {
           return key.replace(/-(.)/g, function(m, ch) {
             return ch.toUpperCase();
           });
         }
       });
-
-      assert.equal(typeof cache.isValidGlob, 'function');
+      assert.equal(typeof loader.cache.isValidGlob, 'function');
     });
   });
 
   describe('rename options', function() {
-    it('should use a custom renameKey function on file paths:', function() {
-      var cache = {};
-      var helper = loader(cache);
-
-      helper('test/fixtures/a.js', {
-        renameKey: function(key) {
-          return 'helper-' + path.basename(key);
+    it('should use a custom renameHelper function on file paths:', function() {
+      loader.load('test/fixtures/a.js', {
+        renameHelper: function(key) {
+          return 'helper-' + path.basename(key).split('.').join('\\.');
         }
       });
-
-      assert.equal(typeof cache['helper-a.js'], 'function');
+      assert.equal(typeof loader.cache['helper-a.js'], 'function');
     });
   });
-});
 
-describe('options', function() {
+  describe('options.async', function() {
+    it('should add an async flag to async helpers:', function() {
+      loader.load('test/fixtures/a.js', {async: true});
+      assert.equal(loader.cache.a.async, true);
+    });
+  });
+
   describe('options.cwd', function() {
-    it('should pass cwd option to globby:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers('*.js', {
-        cwd: 'test/fixtures'
-      });
-      assert.equal(typeof cache.alpha, 'function');
-      assert.equal(typeof cache.beta, 'function');
-      assert.equal(typeof cache.gamma, 'function');
+    it('should pass cwd option to matched:', function() {
+      loader.load('*.js', {cwd: 'test/fixtures'});
+
+      assert.equal(typeof loader.cache.alpha, 'function');
+      assert.equal(typeof loader.cache.beta, 'function');
+      assert.equal(typeof loader.cache.gamma, 'function');
     });
 
-    it('should pass nonull option to globby:', function() {
-      var cache = {};
-      var helpers = loader(cache);
-      helpers('*.foo', {
+    it('should pass nonull option to matched:', function() {
+      loader.load('*.foo', {
         nonull: true,
         cwd: 'test/fixtures',
       });
-      assert.deepEqual(cache, {});
+
+      assert.deepEqual(loader.cache, {});
     });
   });
 });
+
+

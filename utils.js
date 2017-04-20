@@ -1,64 +1,60 @@
 'use strict';
 
 var path = require('path');
-
-var utils = require('lazy-cache')(require);
-var fn = require;
-require = utils;
-
-/**
- * Lazily required module dependencies
- */
-
-require('extend-shallow', 'extend');
-require('is-valid-glob', 'isGlob');
-require('matched', 'glob');
-require('resolve-dir');
-require = fn;
+var extend = require('extend-shallow');
+var resolveDir = require('resolve-dir');
+var typeOf = require('kind-of');
+var utils = module.exports;
+var cache = {};
 
 /**
  * Utils
  */
 
-utils.tryRequire = function tryRequire(name, opts) {
-  name = utils.resolveDir(name);
+utils.options = function(app, options) {
+  return extend({cwd: process.cwd()}, app.options, options);
+};
 
-  // try to require by `name`
+utils.resolve = function(filepath) {
+  return path.resolve(resolveDir(filepath));
+};
+
+utils.renameHelper = function(name, opts) {
+  if (opts && typeof opts.renameHelper === 'function') {
+    return opts.renameHelper(name);
+  }
+  return path.basename(name, path.extname(name));
+};
+
+utils.isObject = function(val) {
+  return typeOf(val) === 'object';
+};
+
+utils.tryRequire = function(name, options) {
+  if (cache.hasOwnProperty(name)) {
+    return cache[name];
+  }
+
+  var val;
   try {
-    return require(name);
+    val = require(name);
+    cache[name] = val;
+    return val;
   } catch (err) {}
 
-  // try to require by absolute path
+  var opts = extend({cwd: process.cwd()}, options);
   try {
-    return require(utils.resolve(name, opts));
+    val = require(path.resolve(opts.cwd, name));
+    cache[name] = val;
+    return val;
   } catch (err) {}
+
+  try {
+    val = require(utils.resolve(name, opts));
+    cache[name] = val;
+    return val;
+  } catch (err) {}
+
+  cache[name] = null;
   return null;
 };
-
-utils.renameKey = function renameKey(name, opts) {
-  if (opts && typeof opts.renameKey === 'function') {
-    return opts.renameKey(name);
-  }
-  var ext = path.extname(name);
-  return path.basename(name, ext);
-};
-
-utils.resolve = function resolve(fp, opts) {
-  var cwd = (opts && opts.cwd) || process.cwd();
-  return path.resolve(cwd, fp);
-};
-
-utils.isObject = function isObject(val) {
-  return val && typeof val === 'object'
-    && !Array.isArray(val);
-};
-
-utils.arrayify = function arrayify(val) {
-  return val ? (Array.isArray(val) ? val : [val]) : [];
-};
-
-/**
- * Expose `utils`
- */
-
-module.exports = utils;

@@ -1,18 +1,17 @@
-var loader = require('./');
-var cache = {};
-var helpers = loader(cache);
+'use strict';
 
-loader.on('helper', function(name, fn, isAsync) {
-  console.log(name, isAsync);
+var Loader = require('./');
+var loader = new Loader({cwd: 'test/fixtures'});
+
+loader.on('helper', function(name, fn) {
+  console.log(name, fn.isAsync);
 });
 
-var opts = {cwd: 'test/fixtures'};
-
-helpers('upper', function upper(str) {
+loader.load('upper', function upper(str) {
   return str.toUpperCase();
 });
 
-helpers('is-valid-glob', {
+loader.load('is-valid-glob', {
   renameKey: function(key) {
     return key.replace(/\W(.)/g, function(m, ch) {
       return ch.toUpperCase();
@@ -20,23 +19,31 @@ helpers('is-valid-glob', {
   }
 });
 
-helpers('test/fixtures/a.js');
-helpers('test/fixtures/b.js', opts);
-helpers('c.js', opts);
-helpers(['*.js'], opts);
-helpers('test/fixtures/more/[d-f].js');
-helpers(['test/fixtures/more/o*.js']);
-helpers({
+loader.load('a.js');
+loader.load('b.js');
+loader.load('c.js');
+loader.load(['*.js']);
+loader.load('more/[d-f].js');
+loader.load(['more/o*.js']);
+loader.load({
   foo: function() {},
   bar: function() {},
   baz: function() {}
 });
-helpers([
+loader.load([{
+  aaaaa: function() {},
+  bbbbb: function() {},
+  ccccc: function() {}
+}]);
+
+loader.load([
   'has-glob',
   {
-  qux: function() {},
-  fez: function() {}
-}], {
+    qux: function() {},
+    fez: function() {}
+  }
+],
+{
   renameKey: function(key) {
     return key.replace(/-(.)/g, function(m, ch) {
       return ch.toUpperCase();
@@ -44,4 +51,4 @@ helpers([
   }
 });
 
-console.log(cache);
+console.log(loader);
