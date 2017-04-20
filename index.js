@@ -26,7 +26,7 @@ function Loader(options) {
     return new Loader(options);
   }
   this.options = options || {};
-  this.helpers = this.options.helpers || {};
+  this.cache = this.options.helpers || {};
 }
 
 /**
@@ -66,7 +66,7 @@ Loader.prototype.addHelper = function(name, fn, options) {
     fn.async = true;
   }
 
-  set(this.helpers, name, fn);
+  set(this.cache, name, fn);
   this.emit('helper', name, fn);
   return this;
 };
