@@ -1,6 +1,6 @@
-# load-helpers [![NPM version](https://img.shields.io/npm/v/load-helpers.svg?style=flat)](https://www.npmjs.com/package/load-helpers) [![NPM downloads](https://img.shields.io/npm/dm/load-helpers.svg?style=flat)](https://npmjs.org/package/load-helpers) [![Build Status](https://img.shields.io/travis/jonschlinkert/load-helpers.svg?style=flat)](https://travis-ci.org/jonschlinkert/load-helpers)
+# load-helpers [![NPM version](https://img.shields.io/npm/v/load-helpers.svg?style=flat)](https://www.npmjs.com/package/load-helpers) [![NPM monthly downloads](https://img.shields.io/npm/dm/load-helpers.svg?style=flat)](https://npmjs.org/package/load-helpers)  [![NPM total downloads](https://img.shields.io/npm/dt/load-helpers.svg?style=flat)](https://npmjs.org/package/load-helpers) [![Linux Build Status](https://img.shields.io/travis/jonschlinkert/load-helpers.svg?style=flat&label=Travis)](https://travis-ci.org/jonschlinkert/load-helpers)
 
-Load helpers with patterns, as an object, key-value pair, or module.
+> Load helpers with patterns, as an object, key-value pair, or module.
 
 ## Install
 
@@ -10,73 +10,128 @@ Install with [npm](https://www.npmjs.com/):
 $ npm install --save load-helpers
 ```
 
-## Usage
+Install with [yarn](https://yarnpkg.com):
 
-```js
-var loader = require('load-helpers');
-// optionally pass an object to use for caching the helpers
-var cache = {};
-var helpers = loader(cache);
-
-// object of helpers
-helpers({
-  a: function() {},
-  b: function() {},
-  c: function() {}
-});
-
-// key-value pairs
-helpers('d', function() {});
-helpers('e', function() {});
-helpers('f', function() {});
-
-// glob pattern or file path, string or array
-helpers('helpers/*.js'); // g, h, i
-
-// required from node_modules
-helpers('j');
+```sh
+$ yarn add load-helpers
 ```
 
-Results in:
+## API
 
-```js
-{
-  a: function(){},
-  b: function(){},
-  c: function(){},
-  d: function(){},
-  e: function(){},
-  f: function(){},
-  g: function(){},
-  h: function(){},
-  i: function(){},
-  j: function(){}
-}
-```
+### [Loader](index.js#L24)
 
-## options.renameKey
+Create an instance of `Loader` with the given `options`.
 
-When requiring helpers from a filepath or `node_modules` a `renameKey` function may be passed on the helper's options to customize how the key is named:
+**Params**
+
+* `options` **{Object}**
 
 **Example**
 
 ```js
-helpers('for-own', {
-  renameKey: function (key) {
-    // naive camelize
-    return key.replace(/\W(.)/g, function (_, ch) {
+var Loader = require('load-helpers');
+var loader = new Loader();
+```
+
+### [.addHelper](index.js#L53)
+
+Register a helper function by `name`.
+
+**Params**
+
+* `name` **{String}**
+* `fn` **{Function}**
+* `options` **{Object}**
+
+**Example**
+
+```js
+loader.addHelper('foo', function() {
+  // do stuff
+});
+```
+
+### [.addHelpers](index.js#L89)
+
+Register an object of helper functions.
+
+**Params**
+
+* `helpers` **{Object}**
+* `options` **{Object}**
+
+**Example**
+
+```js
+loader.addHelpers({
+  foo: function() {},
+  bar: function() {},
+  baz: function() {}
+});
+```
+
+### [.load](index.js#L116)
+
+Load one or more helpers from a filepath, glob pattern, object, or an array of any of those things. This method detects the type of value to be handled then calls one of the other methods to do the actual loading.
+
+**Params**
+
+* `helpers` **{Object}**
+* `options` **{Object}**
+* `returns` **{Object}**: Returns the views from `loader.helpers`
+
+**Example**
+
+```js
+var loader = new Loader();
+console.log(loader.load(['foo/*.hbs', 'bar/*.hbs']));
+console.log(loader.load({path: 'a/b/c.md'}));
+console.log(loader.load('index', {path: 'a/b/c.md'}));
+```
+
+## options.renameHelper
+
+Customize how dynamically-added helpers are named as they're loaded.
+
+**Examples**
+
+Pass a custom `renameHelper` function on the ctor.
+
+```js
+var loader = new Loader({
+  renameHelper: function(key) {
+    // simple camel-case
+    return key.replace(/\W(.)/g, function(_, ch) {
       return ch.toUpperCase();
     });
   }
 });
-//=> {forOwn: [function]}
+
+loader.load('for-own');
+console.log(loader.helpers);
+// { 'forOwn': [Function: forOwn] }
+```
+
+Or to only renamed specific helpers, you can pass the `renameHelper` function to any of the methods.
+
+```js
+loader.load('for-own', {
+  renameHelper: function(key) {
+    // simple camel-case
+    return key.replace(/\W(.)/g, function(_, ch) {
+      return ch.toUpperCase();
+    });
+  }
+});
+console.log(loader.helpers);
+// { 'forOwn': [Function: forOwn] }
 ```
 
 ## About
 
 ### Related projects
 
-* [handlebars-helpers](https://www.npmjs.com/package/handlebars-helpers): More than 130 Handlebars helpers in ~20 categories. Helpers can be used with Assemble, Generate… [more](https://github.com/assemble/handlebars-helpers) | [homepage](https://github.com/assemble/handlebars-helpers "More than 130 Handlebars helpers in ~20 categories. Helpers can be used with Assemble, Generate, Verb, Ghost, gulp-handlebars, grunt-handlebars, consolidate, or any node.js/Handlebars project.")
+* [handlebars-helpers](https://www.npmjs.com/package/handlebars-helpers): More than 130 Handlebars helpers in ~20 categories. Helpers can be used with Assemble, Generate… [more](https://github.com/helpers/handlebars-helpers) | [homepage](https://github.com/helpers/handlebars-helpers "More than 130 Handlebars helpers in ~20 categories. Helpers can be used with Assemble, Generate, Verb, Ghost, gulp-handlebars, grunt-handlebars, consolidate, or any node.js/Handlebars project.")
 * [helper-cache](https://www.npmjs.com/package/helper-cache): Easily register and get helper functions to be passed to any template engine or node.js… [more](https://github.com/jonschlinkert/helper-cache) | [homepage](https://github.com/jonschlinkert/helper-cache "Easily register and get helper functions to be passed to any template engine or node.js application. Methods for both sync and async helpers.")
 * [template-helpers](https://www.npmjs.com/package/template-helpers): Generic JavaScript helpers that can be used with any template engine. Handlebars, Lo-Dash, Underscore, or… [more](https://github.com/jonschlinkert/template-helpers) | [homepage](https://github.com/jonschlinkert/template-helpers "Generic JavaScript helpers that can be used with any template engine. Handlebars, Lo-Dash, Underscore, or any engine that supports helper functions.")
 * [templates](https://www.npmjs.com/package/templates): System for creating and managing template collections, and rendering templates with any node.js template engine… [more](https://github.com/jonschlinkert/templates) | [homepage](https://github.com/jonschlinkert/templates "System for creating and managing template collections, and rendering templates with any node.js template engine. Can be used as the basis for creating a static site generator or blog framework.")
@@ -85,22 +140,29 @@ helpers('for-own', {
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
+### Contributors
+
+| **Commits** | **Contributor** | 
+| --- | --- |
+| 39 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 3 | [doowb](https://github.com/doowb) |
+
 ### Building docs
 
-_(This document was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme) (a [verb](https://github.com/verbose/verb) generator), please don't edit the readme directly. Any changes to the readme must be made in [.verb.md](.verb.md).)_
+_(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
 
-To generate the readme and API documentation with [verb](https://github.com/verbose/verb):
+To generate the readme, run the following command:
 
 ```sh
-$ npm install -g verb verb-generate-readme && verb
+$ npm install -g verbose/verb#dev verb-generate-readme && verb
 ```
 
 ### Running tests
 
-Install dev dependencies:
+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
 
 ```sh
-$ npm install -d && npm test
+$ npm install && npm test
 ```
 
 ### Author
@@ -108,13 +170,13 @@ $ npm install -d && npm test
 **Jon Schlinkert**
 
 * [github/jonschlinkert](https://github.com/jonschlinkert)
-* [twitter/jonschlinkert](http://twitter.com/jonschlinkert)
+* [twitter/jonschlinkert](https://twitter.com/jonschlinkert)
 
 ### License
 
-Copyright © 2016, [Jon Schlinkert](https://github.com/jonschlinkert).
-Released under the [MIT license](https://github.com/jonschlinkert/load-helpers/blob/master/LICENSE).
+Copyright © 2017, [Jon Schlinkert](https://github.com/jonschlinkert).
+Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb](https://github.com/verbose/verb), v0.9.0, on July 23, 2016._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.5.0, on April 20, 2017._
