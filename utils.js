@@ -54,7 +54,6 @@ utils.tryRequire = function(name, options) {
     cache[name] = val;
     return val;
   } catch (err) {}
-
   cache[name] = null;
   return null;
 };

@@ -26,7 +26,7 @@ function Loader(options) {
     return new Loader(options);
   }
   this.options = options || {};
-  this.cache = this.options.cache || {};
+  this.helpers = this.options.helpers || {};
 }
 
 /**
@@ -35,6 +35,20 @@ function Loader(options) {
 
 Loader.prototype = Object.create(Emitter.prototype);
 Loader.prototype.constructor = Loader;
+
+/**
+ * Register a helper function by `name`.
+ *
+ * ```js
+ * loader.addHelper('foo', function() {
+ *   // do stuff
+ * });
+ * ```
+ * @param {String} `name`
+ * @param {Function} `fn`
+ * @param {Object} `options`
+ * @api public
+ */
 
 Loader.prototype.addHelper = function(name, fn, options) {
   if (typeof name !== 'string') {
@@ -52,10 +66,25 @@ Loader.prototype.addHelper = function(name, fn, options) {
     fn.async = true;
   }
 
-  set(this.cache, name, fn);
+  set(this.helpers, name, fn);
   this.emit('helper', name, fn);
   return this;
 };
+
+/**
+ * Register an object of helper functions.
+ *
+ * ```js
+ * loader.addHelpers({
+ *   foo: function() {},
+ *   bar: function() {},
+ *   baz: function() {}
+ * });
+ * ```
+ * @param {Object} `helpers`
+ * @param {Object} `options`
+ * @api public
+ */
 
 Loader.prototype.addHelpers = function(helpers, options) {
   var keys = Object.keys(helpers);
@@ -68,9 +97,9 @@ Loader.prototype.addHelpers = function(helpers, options) {
 
 /**
  * Load one or more helpers from a filepath, glob pattern, object, or
- * array of filepaths, glob patterns or objects. This method detects
- * the type of value to be handled then calls one of the other methods
- * to do the actual loading.
+ * an array of any of those things. This method detects the type of
+ * value to be handled then calls one of the other methods to do the
+ * actual loading.
  *
  * ```js
  * var loader = new Loader();
@@ -80,7 +109,7 @@ Loader.prototype.addHelpers = function(helpers, options) {
  * ```
  * @param {Object} `helpers`
  * @param {Object} `options`
- * @return {Object} Returns the views from `loader.cache`
+ * @return {Object} Returns the views from `loader.helpers`
  * @api public
  */
 
@@ -128,9 +157,6 @@ Loader.prototype.loadHelper = function(name, fn, options) {
     if (utils.isObject(val)) {
       return this.addHelpers(val, options);
     }
-
-    name = utils.renameHelper(name, options);
-    return this.addHelper(name, val, options);
   }
 
   this.addHelper(name, fn, options);
@@ -230,6 +256,7 @@ Loader.prototype.loadGlob = function(patterns, options) {
   }
   return cache;
 };
+
 
 /**
  * Expose `Loader`

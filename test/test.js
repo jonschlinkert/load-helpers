@@ -35,13 +35,13 @@ describe('load helpers:', function() {
       loader.loadHelper('lower', function(str) {
         return str.toLowerCase();
       });
-      assert.equal(typeof loader.cache.upper, 'function');
-      assert.equal(typeof loader.cache.lower, 'function');
+      assert.equal(typeof loader.helpers.upper, 'function');
+      assert.equal(typeof loader.helpers.lower, 'function');
     });
 
     it('should load a key-value pair where the value is a string:', function() {
       loader.load('foo', 'test/fixtures/a.js');
-      assert.equal(typeof loader.cache.foo, 'function');
+      assert.equal(typeof loader.helpers.foo, 'function');
     });
   });
 
@@ -51,10 +51,10 @@ describe('load helpers:', function() {
       loader.load('test/fixtures/b.js');
       loader.load('test/fixtures/c.js');
 
-      assert.equal(size(loader.cache), 3);
-      assert.equal(typeof loader.cache.a, 'function');
-      assert.equal(typeof loader.cache.b, 'function');
-      assert.equal(typeof loader.cache.c, 'function');
+      assert.equal(size(loader.helpers), 3);
+      assert.equal(typeof loader.helpers.a, 'function');
+      assert.equal(typeof loader.helpers.b, 'function');
+      assert.equal(typeof loader.helpers.c, 'function');
     });
   });
 
@@ -81,20 +81,20 @@ describe('load helpers:', function() {
         }
       });
 
-      assert.equal(size(loader.cache), 5);
-      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(size(loader.helpers), 5);
+      assert.equal(typeof loader.helpers.a, 'function');
     });
 
     it('should load an object of helpers with filepath values', function() {
       loader.load({a: 'test/fixtures/a.js'});
-      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(typeof loader.helpers.a, 'function');
     });
 
     it('should load an object of helpers with array values', function() {
       loader.load({foo: ['test/fixtures/a.js', 'test/fixtures/b.js']});
 
-      assert.equal(typeof loader.cache.foo.a, 'function');
-      assert.equal(typeof loader.cache.foo.b, 'function');
+      assert.equal(typeof loader.helpers.foo.a, 'function');
+      assert.equal(typeof loader.helpers.foo.b, 'function');
     });
   });
 
@@ -102,10 +102,10 @@ describe('load helpers:', function() {
     it('should load helpers from an array of file paths:', function() {
       loader.load(['test/fixtures/a.js', 'test/fixtures/b.js', 'test/fixtures/c.js']);
 
-      assert.equal(size(loader.cache), 3);
-      assert.equal(typeof loader.cache.a, 'function');
-      assert.equal(typeof loader.cache.b, 'function');
-      assert.equal(typeof loader.cache.c, 'function');
+      assert.equal(size(loader.helpers), 3);
+      assert.equal(typeof loader.helpers.a, 'function');
+      assert.equal(typeof loader.helpers.b, 'function');
+      assert.equal(typeof loader.helpers.c, 'function');
     });
 
     it('should load helpers from an array of objects:', function() {
@@ -131,32 +131,32 @@ describe('load helpers:', function() {
         }
       ]);
 
-      assert.equal(size(loader.cache), 5);
-      assert.equal(typeof loader.cache.a, 'function');
+      assert.equal(size(loader.helpers), 5);
+      assert.equal(typeof loader.helpers.a, 'function');
     });
 
     it('should load helper objects defined as an array of file paths:', function() {
       loader.load(['test/fixtures/a.js', 'test/fixtures/b.js', 'test/fixtures/c.js']);
-      assert.equal(typeof loader.cache.a, 'function');
-      assert.equal(typeof loader.cache.b, 'function');
-      assert.equal(typeof loader.cache.c, 'function');
+      assert.equal(typeof loader.helpers.a, 'function');
+      assert.equal(typeof loader.helpers.b, 'function');
+      assert.equal(typeof loader.helpers.c, 'function');
     });
   });
 
   describe('glob', function() {
     it('should load helper objects defined as an array of glob patterns:', function() {
       loader.load(['test/fixtures/*.js']);
-      assert.equal(typeof loader.cache.a, 'function');
-      assert.equal(typeof loader.cache.b, 'function');
-      assert.equal(typeof loader.cache.c, 'function');
+      assert.equal(typeof loader.helpers.a, 'function');
+      assert.equal(typeof loader.helpers.b, 'function');
+      assert.equal(typeof loader.helpers.c, 'function');
     });
 
     it('should load helper objects defined as a string of glob patterns:', function() {
       loader.load('test/fixtures/*.js');
 
-      assert.equal(typeof loader.cache.a, 'function');
-      assert.equal(typeof loader.cache.b, 'function');
-      assert.equal(typeof loader.cache.c, 'function');
+      assert.equal(typeof loader.helpers.a, 'function');
+      assert.equal(typeof loader.helpers.b, 'function');
+      assert.equal(typeof loader.helpers.c, 'function');
     });
   });
 
@@ -178,11 +178,11 @@ describe('load helpers:', function() {
           }
         }
       });
-      assert.equal(size(loader.cache.utils), 4);
-      assert.equal(typeof loader.cache.utils.a, 'function');
-      assert.equal(typeof loader.cache.utils.b, 'function');
-      assert.equal(typeof loader.cache.utils.c, 'function');
-      assert.equal(typeof loader.cache.utils.d, 'function');
+      assert.equal(size(loader.helpers.utils), 4);
+      assert.equal(typeof loader.helpers.utils.a, 'function');
+      assert.equal(typeof loader.helpers.utils.b, 'function');
+      assert.equal(typeof loader.helpers.utils.c, 'function');
+      assert.equal(typeof loader.helpers.utils.d, 'function');
     });
 
     it('should add an array of helper objects to a namespace', function() {
@@ -202,11 +202,11 @@ describe('load helpers:', function() {
           }
         }]
       });
-      assert.equal(size(loader.cache.utils), 4);
-      assert.equal(typeof loader.cache.utils.a, 'function');
-      assert.equal(typeof loader.cache.utils.b, 'function');
-      assert.equal(typeof loader.cache.utils.c, 'function');
-      assert.equal(typeof loader.cache.utils.d, 'function');
+      assert.equal(size(loader.helpers.utils), 4);
+      assert.equal(typeof loader.helpers.utils.a, 'function');
+      assert.equal(typeof loader.helpers.utils.b, 'function');
+      assert.equal(typeof loader.helpers.utils.c, 'function');
+      assert.equal(typeof loader.helpers.utils.d, 'function');
     });
 
     it('should add an array of helper strings to a namespace', function() {
@@ -217,10 +217,10 @@ describe('load helpers:', function() {
           'test/fixtures/c.js'
         ]
       });
-      assert.equal(size(loader.cache.utils), 3);
-      assert.equal(typeof loader.cache.utils.a, 'function');
-      assert.equal(typeof loader.cache.utils.b, 'function');
-      assert.equal(typeof loader.cache.utils.c, 'function');
+      assert.equal(size(loader.helpers.utils), 3);
+      assert.equal(typeof loader.helpers.utils.a, 'function');
+      assert.equal(typeof loader.helpers.utils.b, 'function');
+      assert.equal(typeof loader.helpers.utils.c, 'function');
     });
 
     it('should add an array of mixed helper args to a namespace', function() {
@@ -238,11 +238,11 @@ describe('load helpers:', function() {
           }
         ]
       });
-      assert.equal(size(loader.cache.utils), 4);
-      assert.equal(typeof loader.cache.utils.a, 'function');
-      assert.equal(typeof loader.cache.utils.b, 'function');
-      assert.equal(typeof loader.cache.utils.c, 'function');
-      assert.equal(typeof loader.cache.utils.d, 'function');
+      assert.equal(size(loader.helpers.utils), 4);
+      assert.equal(typeof loader.helpers.utils.a, 'function');
+      assert.equal(typeof loader.helpers.utils.b, 'function');
+      assert.equal(typeof loader.helpers.utils.c, 'function');
+      assert.equal(typeof loader.helpers.utils.d, 'function');
     });
   });
 
@@ -255,7 +255,7 @@ describe('load helpers:', function() {
           });
         }
       });
-      assert.equal(typeof loader.cache.isValidGlob, 'function');
+      assert.equal(typeof loader.helpers.isValidGlob, 'function');
     });
   });
 
@@ -266,14 +266,14 @@ describe('load helpers:', function() {
           return 'helper-' + path.basename(key).split('.').join('\\.');
         }
       });
-      assert.equal(typeof loader.cache['helper-a.js'], 'function');
+      assert.equal(typeof loader.helpers['helper-a.js'], 'function');
     });
   });
 
   describe('options.async', function() {
     it('should add an async flag to async helpers:', function() {
       loader.load('test/fixtures/a.js', {async: true});
-      assert.equal(loader.cache.a.async, true);
+      assert.equal(loader.helpers.a.async, true);
     });
   });
 
@@ -281,9 +281,9 @@ describe('load helpers:', function() {
     it('should pass cwd option to matched:', function() {
       loader.load('*.js', {cwd: 'test/fixtures'});
 
-      assert.equal(typeof loader.cache.alpha, 'function');
-      assert.equal(typeof loader.cache.beta, 'function');
-      assert.equal(typeof loader.cache.gamma, 'function');
+      assert.equal(typeof loader.helpers.alpha, 'function');
+      assert.equal(typeof loader.helpers.beta, 'function');
+      assert.equal(typeof loader.helpers.gamma, 'function');
     });
 
     it('should pass nonull option to matched:', function() {
@@ -292,7 +292,7 @@ describe('load helpers:', function() {
         cwd: 'test/fixtures',
       });
 
-      assert.deepEqual(loader.cache, {});
+      assert.deepEqual(loader.helpers, {});
     });
   });
 });
